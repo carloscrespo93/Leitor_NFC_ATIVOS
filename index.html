@@ -5,21 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitor NFC</title>
     <style>
-        /* A propriedade pre-wrap preserva as quebras de linha (\n) do texto lido */
+        /* 'white-space: pre-wrap' força o HTML a respeitar todas as quebras de linha */
         #output {
             white-space: pre-wrap;
-            font-family: monospace; /* Opcional: deixa o texto alinhado estilo bloco de notas */
+            font-family: monospace;
             background-color: #f4f4f4;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 16px;
+            border-radius: 8px;
             margin-top: 15px;
+            font-size: 14px;
+            line-height: 1.4;
         }
     </style>
 </head>
 <body>
     <h1>Leitura de NFC</h1>
     <button id="startButton">Iniciar Leitura NFC</button>
-    <p id="output"></p>
+    
+    <!-- Mudamos de <p> para <pre> para preservar a formatação de texto puro -->
+    <pre id="output"></pre>
 
     <script>
         const startButton = document.getElementById('startButton');
@@ -33,13 +37,19 @@
                     output.textContent = 'Aguardando leitura da tag NFC...';
 
                     ndef.onreading = event => {
-                        const decoder = new TextDecoder();
                         for (const record of event.message.records) {
-                            // 1. Decodifica o texto e salva na variável 'texto'
-                            const texto = decoder.decode(record.data);
-                            
-                            // 2. Exibe o texto completo no elemento (o CSS fará a quebra de linha)
-                            output.textContent = `Dados lidos:\n${texto}`;
+                            if (record.recordType === "text") {
+                                // Decodificação padrão NDEF (remove o código do idioma do início)
+                                const textDecoder = new TextDecoder(record.encoding || "utf-8");
+                                const data = new Uint8Array(record.data.buffer);
+                                const langCodeLength = data[0] & 0x3F;
+                                const textoLimpo = textDecoder.decode(data.subarray(1 + langCodeLength));
+
+                                output.textContent = textoLimpo;
+                            } else {
+                                const decoder = new TextDecoder();
+                                output.textContent = decoder.decode(record.data);
+                            }
                         }
                     };
                 } catch (error) {
