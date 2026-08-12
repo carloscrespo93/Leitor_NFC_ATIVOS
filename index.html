@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitor NFC</title>
+    <style>
+        /* A propriedade pre-wrap preserva as quebras de linha (\n) do texto lido */
+        #output {
+            white-space: pre-wrap;
+            font-family: monospace; /* Opcional: deixa o texto alinhado estilo bloco de notas */
+            background-color: #f4f4f4;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
     <h1>Leitura de NFC</h1>
@@ -24,8 +35,11 @@
                     ndef.onreading = event => {
                         const decoder = new TextDecoder();
                         for (const record of event.message.records) {
-                            output.textContent = `Dados lidos: ${decoder.decode(record.data)}`;
-							output.innerHTML = texto.replace(/\n/g, '<br>');
+                            // 1. Decodifica o texto e salva na variável 'texto'
+                            const texto = decoder.decode(record.data);
+                            
+                            // 2. Exibe o texto completo no elemento (o CSS fará a quebra de linha)
+                            output.textContent = `Dados lidos:\n${texto}`;
                         }
                     };
                 } catch (error) {
