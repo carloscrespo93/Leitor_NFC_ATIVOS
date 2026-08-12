@@ -25,6 +25,7 @@
                         const decoder = new TextDecoder();
                         for (const record of event.message.records) {
                             output.textContent = `Dados lidos: ${decoder.decode(record.data)}`;
+							output.innerHTML = texto.replace(/\n/g, '<br>');
                         }
                     };
                 } catch (error) {
