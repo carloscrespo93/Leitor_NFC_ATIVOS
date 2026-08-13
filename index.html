@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leitor NFC</title>
     <style>
-        /* 'white-space: pre-wrap' força o HTML a respeitar todas as quebras de linha */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+		
+		/* 'white-space: pre-wrap' força o HTML a respeitar todas as quebras de linha */
         #output {
             white-space: pre-wrap;
             font-family: monospace;
@@ -16,40 +22,120 @@
             font-size: 14px;
             line-height: 1.4;
         }
+		
+        body {
+            background: #1c1c1c;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            gap: 40px;
+        }
+
+        .nfc-container {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .sonar-ring {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 1px solid #d4a03c;
+            opacity: 0;
+            animation: sonar 3s ease-out infinite;
+        }
+
+        .sonar-ring:nth-child(2) { animation-delay: 1s; }
+        .sonar-ring:nth-child(3) { animation-delay: 2s; }
+
+        @keyframes sonar {
+            0% {
+                width: 100px;
+                height: 100px;
+                opacity: 0.6;
+            }
+            100% {
+                width: 220px;
+                height: 220px;
+                opacity: 0;
+            }
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+        }
+
+        .circle.c3 {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #d4a03c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(212, 160, 60, 0.05);
+        }
+
+        .circle.c3 span {
+            color: #d4a03c;
+            font-weight: bold;
+            font-size: 20px;
+            letter-spacing: 1px;
+        }
+
+        .label {
+            color: #b0aca4;
+            font-size: 14px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        #output {
+            color: #b0aca4;
+            font-size: 13px;
+            white-space: pre-line;
+            text-align: center;
+            max-width: 80%;
+        }
     </style>
 </head>
 <body>
-    <h1>Leitura de NFC</h1>
-    <button id="startButton">Iniciar Leitura NFC</button>
-    
-    <!-- Mudamos de <p> para <pre> para preservar a formatação de texto puro -->
+    <div class="nfc-container" id="nfcTrigger">
+        <div class="sonar-ring"></div>
+        <div class="sonar-ring"></div>
+        <div class="sonar-ring"></div>
+        <div class="circle c3"><span>NFC</span></div>
+    </div>
+
+    <div class="label" id="label">Aproxime o celular da tag</div>
     <pre id="output"></pre>
 
     <script>
-        const startButton = document.getElementById('startButton');
+        const nfcTrigger = document.getElementById('nfcTrigger');
         const output = document.getElementById('output');
+        const label = document.getElementById('label');
 
-        startButton.addEventListener('click', async () => {
+        async function iniciarLeitura() {
             if ('NDEFReader' in window) {
                 try {
                     const ndef = new NDEFReader();
                     await ndef.scan();
-                    output.textContent = 'Aguardando leitura da tag NFC...';
-
+                    label.textContent = 'Aproxime o celular da tag';
                     ndef.onreading = event => {
+                        const decoder = new TextDecoder();
                         for (const record of event.message.records) {
-                            if (record.recordType === "text") {
-                                // Decodificação padrão NDEF (remove o código do idioma do início)
-                                const textDecoder = new TextDecoder(record.encoding || "utf-8");
-                                const data = new Uint8Array(record.data.buffer);
-                                const langCodeLength = data[0] & 0x3F;
-                                const textoLimpo = textDecoder.decode(data.subarray(1 + langCodeLength));
-
-                                output.textContent = textoLimpo;
-                            } else {
-                                const decoder = new TextDecoder();
-                                output.textContent = decoder.decode(record.data);
-                            }
+                            output.textContent = `Dados lidos: ${decoder.decode(record.data)}`;
                         }
                     };
                 } catch (error) {
@@ -58,7 +144,18 @@
             } else {
                 output.textContent = 'NFC não suportado neste navegador.';
             }
-        });
+        }
+
+        // Clique no círculo dispara a leitura
+        nfcTrigger.addEventListener('click', iniciarLeitura);
+
+        // Clique em qualquer lugar da tela (fora do círculo) também dispara,
+        // já que a Web NFC exige interação do usuário para iniciar
+        document.body.addEventListener('click', (event) => {
+            if (!nfcTrigger.contains(event.target)) {
+                iniciarLeitura();
+            }
+        }, { once: true });
     </script>
 </body>
 </html>
