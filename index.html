@@ -30,6 +30,11 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: opacity 0.3s ease;
+        }
+
+        .nfc-container.hidden {
+            display: none;
         }
 
         .sonar-ring {
@@ -172,6 +177,7 @@
                         label.textContent = 'Tag lida com sucesso';
                         label.classList.add('success');
                         resetButton.classList.add('visible');
+                        nfcTrigger.classList.add('hidden');
                     };
                 } catch (error) {
                     output.textContent = `Erro: ${error}`;
@@ -187,6 +193,7 @@
             label.textContent = 'Aproxime o celular da tag';
             label.classList.remove('success');
             resetButton.classList.remove('visible');
+            nfcTrigger.classList.remove('hidden');
             // O ndef.scan() já iniciado continua escutando novas tags automaticamente,
             // não é necessário chamar scan() de novo.
         }
