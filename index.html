@@ -10,19 +10,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-		
-		/* 'white-space: pre-wrap' força o HTML a respeitar todas as quebras de linha */
-        #output {
-            white-space: pre-wrap;
-            font-family: monospace;
-            background-color: #f4f4f4;
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 15px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-		
+
         body {
             background: #1c1c1c;
             height: 100vh;
@@ -83,13 +71,16 @@
             align-items: center;
             justify-content: center;
             background: rgba(212, 160, 60, 0.05);
+            padding: 10px;
         }
 
         .circle.c3 span {
             color: #d4a03c;
             font-weight: bold;
-            font-size: 20px;
-            letter-spacing: 1px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-align: center;
+            line-height: 1.3;
         }
 
         .label {
@@ -99,12 +90,21 @@
             text-transform: uppercase;
             font-weight: 600;
             text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
+        .label.visible {
+            opacity: 1;
+        }
+
+        /* 'white-space: pre-wrap' força o HTML a respeitar todas as quebras de linha */
         #output {
+            white-space: pre-wrap;
+            font-family: monospace;
             color: #b0aca4;
             font-size: 13px;
-            white-space: pre-line;
+            line-height: 1.4;
             text-align: center;
             max-width: 80%;
         }
@@ -115,7 +115,7 @@
         <div class="sonar-ring"></div>
         <div class="sonar-ring"></div>
         <div class="sonar-ring"></div>
-        <div class="circle c3"><span>NFC</span></div>
+        <div class="circle c3"><span>Clique aqui para iniciar a leitura</span></div>
     </div>
 
     <div class="label" id="label">Aproxime o celular da tag</div>
@@ -127,6 +127,8 @@
         const label = document.getElementById('label');
 
         async function iniciarLeitura() {
+            label.classList.add('visible');
+
             if ('NDEFReader' in window) {
                 try {
                     const ndef = new NDEFReader();
@@ -146,16 +148,7 @@
             }
         }
 
-        // Clique no círculo dispara a leitura
-        nfcTrigger.addEventListener('click', iniciarLeitura);
-
-        // Clique em qualquer lugar da tela (fora do círculo) também dispara,
-        // já que a Web NFC exige interação do usuário para iniciar
-        document.body.addEventListener('click', (event) => {
-            if (!nfcTrigger.contains(event.target)) {
-                iniciarLeitura();
-            }
-        }, { once: true });
+        nfcTrigger.addEventListener('click', iniciarLeitura, { once: true });
     </script>
 </body>
 </html>
