@@ -112,6 +112,29 @@
             text-align: center;
             max-width: 80%;
         }
+
+        #resetButton {
+            display: none;
+            background: transparent;
+            border: 1px solid #d4a03c;
+            color: #d4a03c;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        #resetButton.visible {
+            display: inline-block;
+        }
+
+        #resetButton:hover {
+            background: #d4a03c;
+            color: #1c1c1c;
+        }
     </style>
 </head>
 <body>
@@ -124,18 +147,21 @@
 
     <div class="label" id="label">Aproxime o celular da tag</div>
     <pre id="output"></pre>
+    <button id="resetButton">Ler novamente</button>
 
     <script>
         const nfcTrigger = document.getElementById('nfcTrigger');
         const output = document.getElementById('output');
         const label = document.getElementById('label');
+        const resetButton = document.getElementById('resetButton');
+        let ndef = null;
 
         async function iniciarLeitura() {
             label.classList.add('visible');
 
             if ('NDEFReader' in window) {
                 try {
-                    const ndef = new NDEFReader();
+                    ndef = new NDEFReader();
                     await ndef.scan();
                     label.textContent = 'Aproxime o celular da tag';
                     ndef.onreading = event => {
@@ -145,16 +171,28 @@
                         }
                         label.textContent = 'Tag lida com sucesso';
                         label.classList.add('success');
+                        resetButton.classList.add('visible');
                     };
                 } catch (error) {
                     output.textContent = `Erro: ${error}`;
+                    resetButton.classList.add('visible');
                 }
             } else {
                 output.textContent = 'NFC não suportado neste navegador.';
             }
         }
 
+        function resetarLeitura() {
+            output.textContent = '';
+            label.textContent = 'Aproxime o celular da tag';
+            label.classList.remove('success');
+            resetButton.classList.remove('visible');
+            // O ndef.scan() já iniciado continua escutando novas tags automaticamente,
+            // não é necessário chamar scan() de novo.
+        }
+
         nfcTrigger.addEventListener('click', iniciarLeitura, { once: true });
+        resetButton.addEventListener('click', resetarLeitura);
     </script>
 </body>
 </html>
