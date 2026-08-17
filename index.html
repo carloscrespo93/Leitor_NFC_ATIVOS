@@ -177,6 +177,155 @@
             background: #d4a03c;
             color: #1c1c1c;
         }
+
+        /* Botão para abrir o formulário de gravação */
+        #openFormButton {
+            background: transparent;
+            border: 1px solid #d4a03c;
+            color: #d4a03c;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        #openFormButton:hover {
+            background: #d4a03c;
+            color: #1c1c1c;
+        }
+
+        /* Modal do formulário de gravação */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 100;
+        }
+
+        .modal-overlay.visible {
+            display: flex;
+        }
+
+        .modal-box {
+            width: 100%;
+            max-width: 380px;
+            max-height: 90vh;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #2a2a2a 0%, #202020 100%);
+            border: 1px solid #3a3a3a;
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h2 {
+            color: #e8e6e2;
+            font-size: 15px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        #closeFormButton {
+            background: transparent;
+            border: none;
+            color: #b0aca4;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+
+        #closeFormButton:hover {
+            color: #e8e6e2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            color: #b0aca4;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            background: #262626;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #e8e6e2;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #d4a03c;
+        }
+
+        #writeButton {
+            background: #d4a03c;
+            border: none;
+            color: #1c1c1c;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        #writeButton:hover {
+            background: #e8b24f;
+        }
+
+        #writeButton:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        .write-status {
+            font-size: 13px;
+            text-align: center;
+            min-height: 18px;
+        }
+
+        .write-status.pending {
+            color: #d4a03c;
+        }
+
+        .write-status.success {
+            color: #4caf50;
+        }
+
+        .write-status.error {
+            color: #e05252;
+        }
     </style>
 </head>
 <body>
@@ -199,6 +348,65 @@
     </div>
 
     <button id="resetButton">Ler novamente</button>
+
+    <button id="openFormButton">Gravar novo ativo</button>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Gravar dados na tag</h2>
+                <button id="closeFormButton">&times;</button>
+            </div>
+
+            <div class="form-group">
+                <label for="inputUsuario">Usuário</label>
+                <input type="text" id="inputUsuario" placeholder="Ex: joao.silva">
+            </div>
+
+            <div class="form-group">
+                <label for="inputMaquina">Nome da máquina</label>
+                <input type="text" id="inputMaquina" placeholder="Ex: Compressor Industrial CI-500">
+            </div>
+
+            <div class="form-group">
+                <label for="inputModelo">Modelo</label>
+                <input type="text" id="inputModelo" placeholder="Ex: CI-500X">
+            </div>
+
+            <div class="form-group">
+                <label for="inputLocal">Local</label>
+                <input type="text" id="inputLocal" placeholder="Ex: Setor de Utilidades - Linha 3">
+            </div>
+
+            <div class="form-group">
+                <label for="inputServiceTag">Service Tag</label>
+                <input type="text" id="inputServiceTag" placeholder="Ex: AX-2201-04">
+            </div>
+
+            <div class="form-group">
+                <label for="inputGarantia">Garantia</label>
+                <input type="text" id="inputGarantia" placeholder="Ex: até 12/2027">
+            </div>
+
+            <div class="form-group">
+                <label for="inputUltimaManutencao">Última Manutenção</label>
+                <input type="text" id="inputUltimaManutencao" placeholder="Ex: 10/07/2026">
+            </div>
+
+            <div class="form-group">
+                <label for="inputTecnico">Técnico Responsável</label>
+                <input type="text" id="inputTecnico" placeholder="Ex: Carlos Mendes">
+            </div>
+
+            <div class="form-group">
+                <label for="inputServico">Serviço</label>
+                <input type="text" id="inputServico" placeholder="Ex: Troca de filtro">
+            </div>
+
+            <button id="writeButton">Gravar Tag NFC</button>
+            <div class="write-status" id="writeStatus"></div>
+        </div>
+    </div>
 
     <script>
         const nfcTrigger = document.getElementById('nfcTrigger');
@@ -251,6 +459,93 @@
 
         nfcTrigger.addEventListener('click', iniciarLeitura, { once: true });
         resetButton.addEventListener('click', resetarLeitura);
+
+        // --- Controle do modal de gravação ---
+        const openFormButton = document.getElementById('openFormButton');
+        const closeFormButton = document.getElementById('closeFormButton');
+        const modalOverlay = document.getElementById('modalOverlay');
+
+        openFormButton.addEventListener('click', () => {
+            modalOverlay.classList.add('visible');
+        });
+
+        closeFormButton.addEventListener('click', () => {
+            modalOverlay.classList.remove('visible');
+        });
+
+        // Fecha o modal ao clicar fora da caixa do formulário
+        modalOverlay.addEventListener('click', (event) => {
+            if (event.target === modalOverlay) {
+                modalOverlay.classList.remove('visible');
+            }
+        });
+
+        // --- Gravação de dados na tag ---
+        const writeButton = document.getElementById('writeButton');
+        const writeStatus = document.getElementById('writeStatus');
+        const inputUsuario = document.getElementById('inputUsuario');
+        const inputMaquina = document.getElementById('inputMaquina');
+        const inputModelo = document.getElementById('inputModelo');
+        const inputLocal = document.getElementById('inputLocal');
+        const inputServiceTag = document.getElementById('inputServiceTag');
+        const inputGarantia = document.getElementById('inputGarantia');
+        const inputUltimaManutencao = document.getElementById('inputUltimaManutencao');
+        const inputTecnico = document.getElementById('inputTecnico');
+        const inputServico = document.getElementById('inputServico');
+
+        async function gravarTag() {
+            const dadosAtivo = {
+                usuario: inputUsuario.value.trim(),
+                nomeMaquina: inputMaquina.value.trim(),
+                modelo: inputModelo.value.trim(),
+                local: inputLocal.value.trim(),
+                serviceTag: inputServiceTag.value.trim(),
+                garantia: inputGarantia.value.trim(),
+                ultimaManutencao: inputUltimaManutencao.value.trim(),
+                tecnicoResponsavel: inputTecnico.value.trim(),
+                servico: inputServico.value.trim()
+            };
+
+            const camposVazios = Object.values(dadosAtivo).some(valor => valor === '');
+            if (camposVazios) {
+                writeStatus.textContent = 'Preencha todos os campos antes de gravar.';
+                writeStatus.className = 'write-status error';
+                return;
+            }
+
+            if (!('NDEFReader' in window)) {
+                writeStatus.textContent = 'NFC não suportado neste navegador.';
+                writeStatus.className = 'write-status error';
+                return;
+            }
+
+            const dados = JSON.stringify(dadosAtivo);
+
+            try {
+                writeButton.disabled = true;
+                writeStatus.textContent = 'Aproxime a tag NFC para gravar...';
+                writeStatus.className = 'write-status pending';
+
+                // Reaproveita a instância existente (criada na leitura) ou cria uma nova
+                if (!ndef) {
+                    ndef = new NDEFReader();
+                }
+
+                await ndef.write({
+                    records: [{ recordType: 'text', data: dados }]
+                });
+
+                writeStatus.textContent = 'Tag gravada com sucesso!';
+                writeStatus.className = 'write-status success';
+            } catch (error) {
+                writeStatus.textContent = `Erro ao gravar: ${error}`;
+                writeStatus.className = 'write-status error';
+            } finally {
+                writeButton.disabled = false;
+            }
+        }
+
+        writeButton.addEventListener('click', gravarTag);
     </script>
 </body>
 </html>
