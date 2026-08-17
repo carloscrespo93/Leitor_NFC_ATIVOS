@@ -155,6 +155,39 @@
             margin-top: 12px;
         }
 
+        .result-card .data-rows {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-card .data-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .result-card .data-row:last-child {
+            border-bottom: none;
+        }
+
+        .result-card .data-row .data-label {
+            color: #8a8680;
+            font-size: 12px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .result-card .data-row .data-value {
+            color: #e8e6e2;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+            word-break: break-word;
+        }
+
         #resetButton {
             display: none;
             background: transparent;
@@ -286,6 +319,10 @@
             border-color: #d4a03c;
         }
 
+        .form-group input[type="date"] {
+            color-scheme: dark;
+        }
+
         #writeButton {
             background: #d4a03c;
             border: none;
@@ -344,6 +381,7 @@
         <div class="corner-dot bl"></div>
         <div class="corner-dot br"></div>
         <div class="card-id" id="cardId">IDENTIFICAÇÃO DE ATIVOS JMENDES</div>
+        <div class="data-rows" id="dataRows"></div>
         <pre id="output"></pre>
     </div>
 
@@ -385,12 +423,12 @@
 
             <div class="form-group">
                 <label for="inputGarantia">Garantia</label>
-                <input type="text" id="inputGarantia" placeholder="Ex: até 12/2027">
+                <input type="date" id="inputGarantia">
             </div>
 
             <div class="form-group">
                 <label for="inputUltimaManutencao">Última Manutenção</label>
-                <input type="text" id="inputUltimaManutencao" placeholder="Ex: 10/07/2026">
+                <input type="date" id="inputUltimaManutencao">
             </div>
 
             <div class="form-group">
@@ -411,10 +449,70 @@
     <script>
         const nfcTrigger = document.getElementById('nfcTrigger');
         const output = document.getElementById('output');
+        const dataRows = document.getElementById('dataRows');
         const label = document.getElementById('label');
         const resetButton = document.getElementById('resetButton');
         const resultCard = document.getElementById('resultCard');
         let ndef = null;
+
+        // Rótulos amigáveis para cada campo gravado na tag
+        const ROTULOS_CAMPOS = {
+            usuario: 'Usuário',
+            nomeMaquina: 'Nome da Máquina',
+            modelo: 'Modelo',
+            local: 'Local',
+            serviceTag: 'Service Tag',
+            garantia: 'Garantia',
+            ultimaManutencao: 'Última Manutenção',
+            tecnicoResponsavel: 'Técnico Responsável',
+            servico: 'Serviço'
+        };
+
+        // Campos cujo valor vem no formato aaaa-mm-dd (input type=date) e devem
+        // ser exibidos como dd/mm/aaaa na leitura
+        const CAMPOS_DATA = ['garantia', 'ultimaManutencao'];
+
+        function formatarData(valor) {
+            const partes = valor.split('-');
+            if (partes.length !== 3) return valor;
+            const [ano, mes, dia] = partes;
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function exibirDadosLidos(textoLido) {
+            dataRows.innerHTML = '';
+            output.textContent = '';
+
+            try {
+                const dados = JSON.parse(textoLido);
+
+                // Monta uma linha para cada campo conhecido que veio preenchido
+                Object.keys(ROTULOS_CAMPOS).forEach(chave => {
+                    if (dados[chave]) {
+                        const valorExibido = CAMPOS_DATA.includes(chave)
+                            ? formatarData(dados[chave])
+                            : dados[chave];
+
+                        const row = document.createElement('div');
+                        row.className = 'data-row';
+                        row.innerHTML = `
+                            <span class="data-label">${ROTULOS_CAMPOS[chave]}</span>
+                            <span class="data-value"></span>
+                        `;
+                        row.querySelector('.data-value').textContent = valorExibido;
+                        dataRows.appendChild(row);
+                    }
+                });
+
+                // Se o JSON não tinha nenhum dos campos conhecidos, cai no texto puro
+                if (!dataRows.children.length) {
+                    output.textContent = textoLido;
+                }
+            } catch (error) {
+                // Não é JSON (ex: tag gravada antes dessa versão) — mostra como texto puro
+                output.textContent = textoLido;
+            }
+        }
 
         async function iniciarLeitura() {
             label.classList.add('visible');
@@ -427,7 +525,7 @@
                     ndef.onreading = event => {
                         const decoder = new TextDecoder();
                         for (const record of event.message.records) {
-                            output.textContent = decoder.decode(record.data);
+                            exibirDadosLidos(decoder.decode(record.data));
                         }
                         label.textContent = 'Tag lida com sucesso';
                         label.classList.add('success');
@@ -448,6 +546,7 @@
 
         function resetarLeitura() {
             output.textContent = '';
+            dataRows.innerHTML = '';
             label.textContent = 'Aproxime o celular da tag';
             label.classList.remove('success');
             resetButton.classList.remove('visible');
