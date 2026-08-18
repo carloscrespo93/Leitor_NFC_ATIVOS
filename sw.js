@@ -17,7 +17,7 @@
 // ============================================================
 
 const CACHE_VERSION = "v1";
-const CACHE_NAME = `gym-workout-${CACHE_VERSION}`;
+const CACHE_NAME = `leitor-nfc${CACHE_VERSION}`;
 
 // Arquivos e endereços que precisam estar disponíveis offline.
 // Ajuste os nomes se os seus arquivos tiverem nomes diferentes.
