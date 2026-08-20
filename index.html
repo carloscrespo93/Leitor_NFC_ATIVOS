@@ -299,13 +299,18 @@
             gap: 6px;
         }
 
+        .form-group.hidden {
+            display: none;
+        }
+
         .form-group label {
             color: #6b6b6b;
             font-size: 12px;
             letter-spacing: 0.5px;
         }
 
-        .form-group input {
+        .form-group input,
+        .form-group select {
             background: #fafafa;
             border: 1px solid #dadada;
             border-radius: 6px;
@@ -315,7 +320,8 @@
             font-family: inherit;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: #004D52;
         }
@@ -398,11 +404,19 @@
             </div>
 
             <div class="form-group">
+                <label for="inputTipoAtivo">Tipo do Ativo</label>
+                <select id="inputTipoAtivo">
+                    <option value="Notebook">Notebook</option>
+                    <option value="Impressora">Impressora</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="groupUsuario">
                 <label for="inputUsuario">Usuário</label>
                 <input type="text" id="inputUsuario" placeholder="Ex: joao.silva">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="groupMaquina">
                 <label for="inputMaquina">Nome da máquina</label>
                 <input type="text" id="inputMaquina" placeholder="Ex: Compressor Industrial CI-500">
             </div>
@@ -422,7 +436,12 @@
                 <input type="text" id="inputServiceTag" placeholder="Ex: AX-2201-04">
             </div>
 
-            <div class="form-group">
+            <div class="form-group" id="groupIp">
+                <label for="inputIp">Endereço IP</label>
+                <input type="text" id="inputIp" placeholder="Ex: 192.168.0.10">
+            </div>
+
+            <div class="form-group" id="groupGarantia">
                 <label for="inputGarantia">Garantia</label>
                 <input type="date" id="inputGarantia">
             </div>
@@ -448,19 +467,6 @@
     </div>
 
     <script>
-	
-			if ('serviceWorker' in navigator) {
-			  window.addEventListener('load', () => {
-				navigator.serviceWorker.register('/sw.js')
-				  .then((registration) => {
-					console.log('Service Worker registrado com sucesso! Escopo:', registration.scope);
-				  })
-				  .catch((error) => {
-					console.log('Falha ao registrar o Service Worker:', error);
-				  });
-			  });
-			}
-			
         const nfcTrigger = document.getElementById('nfcTrigger');
         const output = document.getElementById('output');
         const dataRows = document.getElementById('dataRows');
@@ -471,11 +477,13 @@
 
         // Rótulos amigáveis para cada campo gravado na tag
         const ROTULOS_CAMPOS = {
+            tipoAtivo: 'Tipo do Ativo',
             usuario: 'Usuário',
             nomeMaquina: 'Nome da Máquina',
             modelo: 'Modelo',
             local: 'Local',
             serviceTag: 'Service Tag',
+            ip: 'Endereço IP',
             garantia: 'Garantia',
             ultimaManutencao: 'Última Manutenção',
             tecnicoResponsavel: 'Técnico Responsável',
@@ -596,30 +604,68 @@
         // --- Gravação de dados na tag ---
         const writeButton = document.getElementById('writeButton');
         const writeStatus = document.getElementById('writeStatus');
+        const inputTipoAtivo = document.getElementById('inputTipoAtivo');
         const inputUsuario = document.getElementById('inputUsuario');
         const inputMaquina = document.getElementById('inputMaquina');
         const inputModelo = document.getElementById('inputModelo');
         const inputLocal = document.getElementById('inputLocal');
         const inputServiceTag = document.getElementById('inputServiceTag');
+        const inputIp = document.getElementById('inputIp');
         const inputGarantia = document.getElementById('inputGarantia');
         const inputUltimaManutencao = document.getElementById('inputUltimaManutencao');
         const inputTecnico = document.getElementById('inputTecnico');
         const inputServico = document.getElementById('inputServico');
 
+        const groupUsuario = document.getElementById('groupUsuario');
+        const groupMaquina = document.getElementById('groupMaquina');
+        const groupGarantia = document.getElementById('groupGarantia');
+        const groupIp = document.getElementById('groupIp');
+
+        // Ajusta quais campos aparecem conforme o Tipo do Ativo escolhido
+        function atualizarCamposPorTipo() {
+            const isImpressora = inputTipoAtivo.value === 'Impressora';
+
+            groupUsuario.classList.toggle('hidden', isImpressora);
+            groupMaquina.classList.toggle('hidden', isImpressora);
+            groupGarantia.classList.toggle('hidden', isImpressora);
+            groupIp.classList.toggle('hidden', !isImpressora);
+
+            // Limpa o valor dos campos ocultos para não gravar dado desatualizado
+            if (isImpressora) {
+                inputUsuario.value = '';
+                inputMaquina.value = '';
+                inputGarantia.value = '';
+            } else {
+                inputIp.value = '';
+            }
+        }
+
+        inputTipoAtivo.addEventListener('change', atualizarCamposPorTipo);
+        atualizarCamposPorTipo(); // aplica o estado inicial (Notebook) ao carregar
+
         async function gravarTag() {
+            const isImpressora = inputTipoAtivo.value === 'Impressora';
+
             const dadosAtivo = {
+                tipoAtivo: inputTipoAtivo.value,
                 usuario: inputUsuario.value.trim(),
                 nomeMaquina: inputMaquina.value.trim(),
                 modelo: inputModelo.value.trim(),
                 local: inputLocal.value.trim(),
                 serviceTag: inputServiceTag.value.trim(),
+                ip: inputIp.value.trim(),
                 garantia: inputGarantia.value.trim(),
                 ultimaManutencao: inputUltimaManutencao.value.trim(),
                 tecnicoResponsavel: inputTecnico.value.trim(),
                 servico: inputServico.value.trim()
             };
 
-            const camposVazios = Object.values(dadosAtivo).some(valor => valor === '');
+            // Só exige preenchimento dos campos que estão visíveis para o tipo escolhido
+            const camposObrigatorios = isImpressora
+                ? ['tipoAtivo', 'modelo', 'local', 'serviceTag', 'ip', 'ultimaManutencao', 'tecnicoResponsavel', 'servico']
+                : ['tipoAtivo', 'usuario', 'nomeMaquina', 'modelo', 'local', 'serviceTag', 'garantia', 'ultimaManutencao', 'tecnicoResponsavel', 'servico'];
+
+            const camposVazios = camposObrigatorios.some(campo => dadosAtivo[campo] === '');
             if (camposVazios) {
                 writeStatus.textContent = 'Preencha todos os campos antes de gravar.';
                 writeStatus.className = 'write-status error';
@@ -630,6 +676,15 @@
                 writeStatus.textContent = 'NFC não suportado neste navegador.';
                 writeStatus.className = 'write-status error';
                 return;
+            }
+
+            // Remove do JSON os campos não aplicáveis ao tipo escolhido (ficam vazios mesmo)
+            if (isImpressora) {
+                delete dadosAtivo.usuario;
+                delete dadosAtivo.nomeMaquina;
+                delete dadosAtivo.garantia;
+            } else {
+                delete dadosAtivo.ip;
             }
 
             const dados = JSON.stringify(dadosAtivo);
