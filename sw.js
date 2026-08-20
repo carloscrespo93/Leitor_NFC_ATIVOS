@@ -16,7 +16,7 @@
 // versão antiga do app mesmo com internet.
 // ============================================================
 
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `leitor-nfc${CACHE_VERSION}`;
 
 // Arquivos e endereços que precisam estar disponíveis offline.
