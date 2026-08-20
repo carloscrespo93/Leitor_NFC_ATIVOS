@@ -1,5 +1,5 @@
 // ============================================================
-// SERVICE WORKER — GYM Workout
+// SERVICE WORKER — Leitor de ativos JMENDES
 // Coloque este arquivo na RAIZ do repositório, do lado do seu
 // index.html (o registro no HTML já aponta pra "/sw.js").
 //
@@ -17,7 +17,7 @@
 // ============================================================
 
 const CACHE_VERSION = "v3";
-const CACHE_NAME = `leitor-nfc${CACHE_VERSION}`;
+const CACHE_NAME = `leitor-nfc-${CACHE_VERSION}`;
 
 // Arquivos e endereços que precisam estar disponíveis offline.
 // Ajuste os nomes se os seus arquivos tiverem nomes diferentes.
