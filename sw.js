@@ -58,7 +58,7 @@ self.addEventListener("activate", (evento) => {
     caches.keys().then((nomes) =>
       Promise.all(
         nomes
-          .filter((nome) => nome.startsWith("gym-workout-") && nome !== CACHE_NAME)
+          .filter((nome) => nome.startsWith("leitor-nfc-") && nome !== CACHE_NAME)
           .map((nome) => caches.delete(nome))
       )
     )
