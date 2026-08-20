@@ -1,7 +1,7 @@
 {
   "name": "Leitor De Ativo JMENDES",
   "short_name": "ATIVO JMENDES",
-  "description": "Leitot de Ativos JMENDES",
+  "description": "Leitor de Ativos JMENDES",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
